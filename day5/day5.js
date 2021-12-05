@@ -10,6 +10,10 @@ fs.readFile("input.txt", "utf8", (err, data) => {
 });
 
 function processData(data) {
-  let lines = data.split("\n").map((l) => l.split(" -> "));
+  let lines = data
+    .split("\n")
+    .map((l) =>
+      l.split(" -> ").map((str) => parseInt(str.replace(",", ""), 10))
+    );
   return lines;
 }
