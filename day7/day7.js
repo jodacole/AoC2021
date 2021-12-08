@@ -8,16 +8,45 @@ fs.readFile("input.txt", "utf8", (err, data) => {
     return;
   } else {
     console.log(part1(data));
-    //console.log(part2(data));
+    console.log(part2(data));
   }
 });
 
 function part1(data) {
-  let crabList = data.split(",").map((s) => parseInt(s, 10));
-  let average1 = Math.ceil(_.sum(crabList) / crabList.length);
-  let average2 = Math.floor(_.sum(crabList) / crabList.length);
-  return [
-    _.sum(crabList.map((c) => Math.abs(c - average1))),
-    _.sum(crabList.map((c) => Math.abs(c - average2))),
-  ];
+  let crabs = data.split(",").map((s) => parseInt(s, 10));
+  let lastFuelCost = Infinity;
+  let fuelCost = (guess) => {
+    return _(crabs)
+      .map((position) => Math.abs(position - guess))
+      .sum();
+  };
+  currGuess = 0;
+  currFuelCost = fuelCost(currGuess);
+  while (currFuelCost <= lastFuelCost) {
+    currGuess++;
+    lastFuelCost = currFuelCost;
+    currFuelCost = fuelCost(currGuess);
+  }
+  return fuelCost(currGuess - 1);
+}
+
+function part2(data) {
+  let crabs = data.split(",").map((s) => parseInt(s, 10));
+  let lastFuelCost = Infinity;
+  let fuelCost = (guess) => {
+    return _(crabs)
+      .map((position) => {
+        let n = Math.abs(position - guess);
+        return (n * (n + 1)) / 2;
+      })
+      .sum();
+  };
+  currGuess = 0;
+  currFuelCost = fuelCost(currGuess);
+  while (currFuelCost <= lastFuelCost) {
+    currGuess++;
+    lastFuelCost = currFuelCost;
+    currFuelCost = fuelCost(currGuess);
+  }
+  return fuelCost(currGuess - 1);
 }
