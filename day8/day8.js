@@ -1,6 +1,4 @@
-const { resolveObjectURL } = require("buffer");
 const fs = require("fs");
-const { dropRight, result } = require("lodash");
 const _ = require("lodash");
 
 fs.readFile("input.txt", "utf8", (err, data) => {
@@ -32,6 +30,20 @@ const numSegmentsToNumbers = {
   7: [8],
 };
 
+//T=top, M=middle, B=bottom, L=left, R=right
+const numbersToSegments = {
+  0: new Set(["T", "TL", "TR", "BL", "BR", "B"]),
+  1: new Set(["TR", "BR"]),
+  2: new Set(["T", "TR", "M", "BL", "B"]),
+  3: new Set(["T", "TR", "M", "BR", "B"]),
+  4: new Set(["TL", "TR", "M", "BR"]),
+  5: new Set(["T", "TL", "M", "BR", "B"]),
+  6: new Set(["T", "TL", "M", "BL", "BR", "B"]),
+  7: new Set(["T", "TR", "BR"]),
+  8: new Set(["T", "TL", "TR", "M", "BL", "BR", "B"]),
+  9: new Set(["T", "TL", "TR", "M", "BR", "B"]),
+};
+
 function part1(data) {
   let entries = data.split("\n").map((e) => {
     let temp = e.split(" | ");
@@ -47,20 +59,6 @@ function part1(data) {
     )
     .sum();
 }
-
-//T=top, M=middle, B=bottom, L=left, R=right
-const numbersToSegments = {
-  0: new Set(["T", "TL", "TR", "BL", "BR", "B"]),
-  1: new Set(["TR", "BR"]),
-  2: new Set(["T", "TR", "M", "BL", "B"]),
-  3: new Set(["T", "TR", "M", "BR", "B"]),
-  4: new Set(["TL", "TR", "M", "BR"]),
-  5: new Set(["T", "TL", "M", "BR", "B"]),
-  6: new Set(["T", "TL", "M", "BL", "BR", "B"]),
-  7: new Set(["T", "TR", "BR"]),
-  8: new Set(["T", "TL", "TR", "M", "BL", "BR", "B"]),
-  9: new Set(["T", "TL", "TR", "M", "BR", "B"]),
-};
 
 function part2(data) {
   let entries = data.split("\n").map((e) => {
@@ -92,7 +90,7 @@ function part2(data) {
       }
     }
 
-    addressContradictions(charToPossibleSegments);
+    removeContradictions(charToPossibleSegments);
 
     let agenda = [_.cloneDeep(charToPossibleSegments)];
     while (agenda.length > 0) {
@@ -102,7 +100,7 @@ function part2(data) {
           for (seg of currMapping[char]) {
             newMapping = _.cloneDeep(currMapping);
             newMapping[char] = [seg];
-            addressContradictions(newMapping);
+            removeContradictions(newMapping);
             agenda.push(newMapping);
           }
           continue;
@@ -117,7 +115,7 @@ function part2(data) {
   return result;
 }
 
-function addressContradictions(mapping) {
+function removeContradictions(mapping) {
   for (const char1 in mapping) {
     for (const char2 in mapping) {
       if (!isStrictSubset(mapping[char2], mapping[char1])) {
