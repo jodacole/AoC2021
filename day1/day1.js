@@ -6,6 +6,7 @@ fs.readFile("input.txt", "utf8", (err, data) => {
     console.error(err);
     return;
   }
+  console.log(part1Attempt2(data));
   console.log(part2Attempt2(data));
 });
 
