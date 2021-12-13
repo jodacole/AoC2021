@@ -1,14 +1,17 @@
 const fs = require("fs");
 const _ = require("lodash");
+const path = require("path");
 
-fs.readFile("input.txt", "utf8", (err, data) => {
-  if (err) {
-    console.error(err);
-    return;
-  }
-  console.log(part1Attempt2(data));
-  console.log(part2Attempt2(data));
-});
+if (require.main === module) {
+  fs.readFile("input.txt", "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    console.log(part1Attempt2(data));
+    console.log(part2Attempt2(data));
+  });
+}
 
 //Correct Answer: 1766
 function part1Attempt1(data) {
@@ -74,3 +77,11 @@ function part2Attempt2(data) {
       { sum: 0, prev: Infinity }
     ).sum;
 }
+
+function getInput() {
+  return fs.readFileSync(path.resolve(__dirname, "./input.txt"), "utf8");
+}
+
+exports.getInput = getInput;
+exports.part1 = part1Attempt2;
+exports.part2 = part2Attempt2;
