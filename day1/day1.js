@@ -82,6 +82,8 @@ function getInput() {
   return fs.readFileSync(path.resolve(__dirname, "./input.txt"), "utf8");
 }
 
-exports.getInput = getInput;
-exports.part1 = part1Attempt2;
-exports.part2 = part2Attempt2;
+module.exports = {
+  getInput,
+  part1Attempt2,
+  part2Attempt2,
+};
