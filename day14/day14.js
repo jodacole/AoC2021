@@ -1,7 +1,5 @@
 const fs = require("fs");
-const { intersection, result } = require("lodash");
 const _ = require("lodash");
-const { start } = require("repl");
 
 fs.readFile("input.txt", "utf8", (err, data) => {
   if (err) {
@@ -23,7 +21,7 @@ function processInput(data) {
   return [startPolymer, insertionRules];
 }
 
-function part1(data) {
+function part1(data, steps = 10) {
   const [startPolymer, insertionRules] = processInput(data);
 
   let pairCount = {};
@@ -31,8 +29,7 @@ function part1(data) {
     const pair = startPolymer.substring(i, i + 2);
     _.set(pairCount, pair, _.get(pairCount, pair, 0) + 1);
   }
-  const STEPS = 10;
-  for (let i = 0; i < STEPS; i++) {
+  for (let i = 0; i < steps; i++) {
     let newPairCount = {};
     for (const pair in pairCount) {
       const insert = insertionRules[pair];
@@ -53,32 +50,7 @@ function part1(data) {
 }
 
 function part2(data) {
-  const [startPolymer, insertionRules] = processInput(data);
-
-  let pairCount = {};
-  for (let i = 0; i < startPolymer.length - 1; i++) {
-    const pair = startPolymer.substring(i, i + 2);
-    _.set(pairCount, pair, _.get(pairCount, pair, 0) + 1);
-  }
-  const STEPS = 40;
-  for (let i = 0; i < STEPS; i++) {
-    let newPairCount = {};
-    for (const pair in pairCount) {
-      const insert = insertionRules[pair];
-      [pair[0] + insert, insert + pair[1]].forEach((newPair) => {
-        _.set(
-          newPairCount,
-          newPair,
-          _.get(newPairCount, newPair, 0) + pairCount[pair]
-        );
-      });
-    }
-    pairCount = newPairCount;
-  }
-  const elementCounts = elementCount(pairCount);
-  return (
-    _.max(Object.values(elementCounts)) - _.min(Object.values(elementCounts))
-  );
+  return part1(data, 40);
 }
 
 function elementCount(pairCount) {
