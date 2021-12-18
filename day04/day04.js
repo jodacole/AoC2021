@@ -1,15 +1,17 @@
 const fs = require("fs");
 const _ = require("lodash");
+const path = require("path");
 
-fs.readFile("input.txt", "utf8", (err, data) => {
-  if (err) {
-    console.log(err);
-    return;
-  } else {
+if (require.main === module) {
+  fs.readFile("input.txt", "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
     console.log(part1(data));
     console.log(part2(data));
-  }
-});
+  });
+}
 
 function processData(data) {
   const splitData = data.split("\n").filter((e) => e.trim() !== "");
@@ -107,3 +109,13 @@ function part2(data) {
     lastLosingBoard = stillLosingBoards[0];
   }
 }
+
+function getInput() {
+  return fs.readFileSync(path.resolve(__dirname, "./input.txt"), "utf8");
+}
+
+module.exports = {
+  getInput,
+  part1,
+  part2,
+};

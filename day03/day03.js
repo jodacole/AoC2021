@@ -1,14 +1,16 @@
 const fs = require("fs");
+const path = require("path");
 
-fs.readFile("input.txt", "utf8", (err, data) => {
-  if (err) {
-    console.log(err);
-    return;
-  } else {
+if (require.main === module) {
+  fs.readFile("input.txt", "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
     console.log(part1(data));
     console.log(part2(data));
-  }
-});
+  });
+}
 
 function part1(data) {
   const binaries = data.split("\n");
@@ -56,3 +58,13 @@ function part2(data) {
 
   return o2Rating * co2Rating;
 }
+
+function getInput() {
+  return fs.readFileSync(path.resolve(__dirname, "./input.txt"), "utf8");
+}
+
+module.exports = {
+  getInput,
+  part1,
+  part2,
+};
