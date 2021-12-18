@@ -84,6 +84,6 @@ function getInput() {
 
 module.exports = {
   getInput,
-  part1Attempt2,
-  part2Attempt2,
+  part1: part1Attempt2,
+  part2: part2Attempt2,
 };
