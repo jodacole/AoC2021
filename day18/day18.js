@@ -12,7 +12,25 @@ fs.readFile("input.txt", "utf8", (err, data) => {
 });
 
 function processInput(data) {
-  return data.split("\n").map((num) => {
+  return data
+    .split("\n")
+    .map((n) =>
+      n
+        .split("")
+        .map((char) =>
+          Number.isInteger(parseInt(char, 10)) ? parseInt(char, 10) : char
+        )
+    );
+}
+
+function part1(data) {
+  const snailNums = processInput(data);
+  console.log(snailNums.reduce(sumSnailNums).join(""));
+  return magnitude(snailNums.reduce(sumSnailNums));
+}
+
+function magnitude(snailNum, firstCall = true) {
+  const snailNumToTree = (num) => {
     let result = {};
     let currPath = [];
     for (let char of num) {
@@ -28,92 +46,102 @@ function processInput(data) {
       }
     }
     return result;
-  });
+  };
+  const snailNumTree = firstCall ? snailNumToTree(snailNum) : snailNum;
+  if (!snailNumTree) {
+    return snailNumTree;
+  }
+  let result = 0;
+  if (Number.isInteger(snailNumTree.l)) {
+    result += 3 * snailNumTree.l;
+  } else {
+    result += 3 * magnitude(snailNumTree.l, false);
+  }
+  if (Number.isInteger(snailNumTree.r)) {
+    result += 2 * snailNumTree.r;
+  } else {
+    result += 2 * magnitude(snailNumTree.r, false);
+  }
+  return result;
 }
 
-function part1(data) {
-  const snailNums = processInput(data);
-  console.log(JSON.stringify(snailNums[0], null, 2));
-  // return snailNumToString(snailNums[0]);
-  return snailNumToString(reduce(snailNums[0]));
+function sumSnailNums(a, b) {
+  if (a.length === 0) return b;
+  if (b.length === 0) return a;
+  return reduce(_.concat([], "[", a, ",", b, "]"));
 }
 
 function reduce(snailNum) {
-  console.log(snailNumToString(snailNum));
-  const agenda = [["r"], ["l"]];
-  let pathToSplittable = false;
-  while (!_.isEmpty(agenda)) {
-    const currPath = agenda.pop();
-    const valueAtCurrPath = _.get(snailNum, currPath);
-    if (valueAtCurrPath && currPath.length === 5) {
-      console.log("exploding...");
-      explode(snailNum, currPath);
-      return reduce(snailNum);
-    } else if (!Number.isInteger(valueAtCurrPath)) {
-      agenda.push(currPath.concat("r"));
-      agenda.push(currPath.concat("l"));
-    } else if (!pathToSplittable && valueAtCurrPath >= 10) {
-      pathToSplittable = currPath;
-    }
+  //console.log(snailNum.join(""));
+  const exploded = explode(snailNum);
+  if (!_.isEqual(exploded, snailNum)) {
+    //console.log("exploding...");
+    return reduce(exploded);
   }
-  if (pathToSplittable) {
-    console.log("splitting...");
-    split(snailNum, pathToSplittable);
-    return reduce(snailNum);
+
+  const splitted = split(snailNum);
+  if (!_.isEqual(splitted, snailNum)) {
+    //console.log("splitting...");
+    return reduce(splitted);
+  }
+
+  return snailNum;
+}
+
+function split(snailNum) {
+  for (let i = 0; i < snailNum.length; i++) {
+    const char = snailNum[i];
+    if (Number.isInteger(char) && char >= 10) {
+      return _.concat(
+        snailNum.slice(0, i),
+        "[",
+        Math.floor(char / 2),
+        ",",
+        Math.ceil(char / 2),
+        "]",
+        snailNum.slice(i + 1)
+      );
+    }
   }
   return snailNum;
 }
 
-function split(snailNum, pathToSplittable) {
-  const valAtPath = _.get(snailNum, pathToSplittable);
-  _.set(snailNum, pathToSplittable, {
-    l: Math.floor(valAtPath / 2),
-    r: Math.ceil(valAtPath / 2),
-  });
-}
-
-function explode(snailNum, currPath) {
-  const leftDebris = _.get(snailNum, currPath.slice(0, -1).concat("l"));
-  const rightDebris = _.get(snailNum, currPath.slice(0, -1).concat("r"));
-  let tempPath = currPath.slice(0, -2);
-  let leftDebrisAdded = false;
-  let rightDebrisAdded = false;
-  while (tempPath) {
-    currLeftVal = _.get(snailNum, tempPath.concat("l"));
-    if (!leftDebrisAdded && Number.isInteger(currLeftVal)) {
-      _.set(snailNum, tempPath.concat("l"), currLeftVal + leftDebris);
-      leftDebrisAdded = true;
+function explode(snailNum) {
+  let depth = 0;
+  for (let i = 0; i < snailNum.length; i++) {
+    const char = snailNum[i];
+    if (char === "[") {
+      depth++;
+    } else if (char === "]") {
+      depth--;
     }
 
-    currRightVal = _.get(snailNum, tempPath.concat("r"));
-    if (!rightDebrisAdded && Number.isInteger(currRightVal)) {
-      _.set(snailNum, tempPath.concat("r"), currRightVal + rightDebris);
-      rightDebrisAdded = true;
-    }
-    if (_.isEmpty(tempPath)) {
-      tempPath = false;
-    } else {
-      tempPath.pop();
-    }
-  }
-  _.set(snailNum, currPath.slice(0, -1), 0);
-}
+    if (depth === 5) {
+      let result = _.clone(snailNum);
+      const leftDebris = snailNum[i + 1];
+      const rightDebris = snailNum[i + 3];
+      if (!Number.isInteger(leftDebris) || !Number.isInteger(rightDebris)) {
+        console.log(leftDebris, rightDebris);
+        throw "Could not parse debris to explode";
+      }
 
-function snailNumToString(snailNum) {
-  if (!snailNum) {
-    return snailNum;
+      for (let left = i; left >= 0; left--) {
+        if (Number.isInteger(snailNum[left])) {
+          result[left] += leftDebris;
+          break;
+        }
+      }
+
+      for (let right = i + 4; right < snailNum.length; right++) {
+        if (Number.isInteger(snailNum[right])) {
+          result[right] += rightDebris;
+          break;
+        }
+      }
+
+      result = _.concat(result.slice(0, i), 0, result.slice(i + 5));
+      return result;
+    }
   }
-  result = "[";
-  if (Number.isInteger(snailNum.l)) {
-    result += snailNum.l;
-  } else {
-    result += snailNumToString(snailNum.l);
-  }
-  result += ",";
-  if (Number.isInteger(snailNum.r)) {
-    result += snailNum.r;
-  } else {
-    result += snailNumToString(snailNum.r);
-  }
-  return result + "]";
+  return _.clone(snailNum);
 }
