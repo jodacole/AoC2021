@@ -7,7 +7,7 @@ fs.readFile("input.txt", "utf8", (err, data) => {
     return;
   } else {
     console.log(part1(data));
-    //console.log(part2(data));
+    console.log(part2(data));
   }
 });
 
@@ -25,8 +25,20 @@ function processInput(data) {
 
 function part1(data) {
   const snailNums = processInput(data);
-  console.log(snailNums.reduce(sumSnailNums).join(""));
   return magnitude(snailNums.reduce(sumSnailNums));
+}
+
+function part2(data) {
+  const snailNums = processInput(data);
+
+  let largestMag = -Infinity;
+  for (let i = 0; i < snailNums.length; i++) {
+    for (let j = i + 1; j < snailNums.length; j++) {
+      const mag = magnitude(sumSnailNums(snailNums[i], snailNums[j]));
+      largestMag = Math.max(mag, largestMag);
+    }
+  }
+  return largestMag;
 }
 
 function magnitude(snailNum, firstCall = true) {
@@ -72,16 +84,13 @@ function sumSnailNums(a, b) {
 }
 
 function reduce(snailNum) {
-  //console.log(snailNum.join(""));
   const exploded = explode(snailNum);
   if (!_.isEqual(exploded, snailNum)) {
-    //console.log("exploding...");
     return reduce(exploded);
   }
 
   const splitted = split(snailNum);
   if (!_.isEqual(splitted, snailNum)) {
-    //console.log("splitting...");
     return reduce(splitted);
   }
 
